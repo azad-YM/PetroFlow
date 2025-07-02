@@ -76,4 +76,51 @@ class CreateCustomerOrderTest extends ApplicationTestCase {
     $this->assertEquals("EN_ATTENTE_PAIEMENT", $customerOrder->getStatus());
     $this->assertEquals($customerOrder->getAuthorId(), $user->getId());
   }
+
+  public function test_CustomerNotFound() {
+    $client = self::initialize();
+    $product = new Product('product-id');
+
+    /**  @var ICustomerRepository $customerRepository */
+    $customerRepository = self::getContainer()->get(ICustomerRepository::class);
+    $customerRepository->save(new Customer('customer-id'));
+
+    /**  @var IProductRepository $productRepository */
+    $productRepository = self::getContainer()->get(IProductRepository::class);
+    $productRepository->save($product);
+
+    /**  @var IDepositRepository $depositRepository */
+    $depositRepository = self::getContainer()->get(IDepositRepository::class);
+    $depositRepository->save(new Deposit(
+      'deposit-id', 
+      [new ProductStock($product, 300)]
+    ));
+
+    $user = new User("user-id");
+    $user->setEmail("azad@gmail.com");
+    $factory = new PasswordHasherFactory([
+        User::class => ['algorithm' => 'auto'],
+    ]);
+    $passwordHasher = new UserPasswordHasher($factory);
+    $user->setPassword($passwordHasher->hashPassword($user, "azerty"));
+
+    /**  @var IUserRepository $userRepository */
+    $userRepository = self::getContainer()->get(IUserRepository::class);
+    $userRepository->save($user);
+
+    $client->loginUser($user);
+
+    $this->request('POST', '/api/create-customer-order', [
+      "customerId" => "not-found-id",
+      "depositId" => "deposit-id",
+      "productId" => "product-id",
+      "quantity" => 200,
+    ]);
+
+    $response = self::$client->getResponse();
+    $data = json_decode($response->getContent(), true);
+
+    $this->assertResponseStatusCodeSame(404);
+    $this->assertEquals('Customer not found', $data['message']);
+  }
 }

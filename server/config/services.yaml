@@ -26,5 +26,6 @@ services:
     App\Application\Ports\Repositories\IDepositRepository: '@App\Infrastructure\ForProduction\Repository\SqlDepositRepository'
     App\Application\Ports\Repositories\IUserRepository: '@App\Infrastructure\ForProduction\Repository\SqlUserRepository'
 
-
+    App\Application\Listeners\ExceptionListener:
+        tags: [ kernel.event_listener ]
 

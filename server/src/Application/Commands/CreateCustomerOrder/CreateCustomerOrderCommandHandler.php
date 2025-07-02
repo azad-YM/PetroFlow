@@ -2,6 +2,7 @@
 
 namespace App\Application\Commands\CreateCustomerOrder;
 
+use App\Application\Exception\NotFoundException;
 use App\Application\Ports\Repositories\ICustomerOrderRepository;
 use App\Application\Ports\Repositories\ICustomerRepository;
 use App\Application\Ports\Repositories\IDepositRepository;
@@ -22,12 +23,12 @@ class CreateCustomerOrderCommandHandler {
   public function execute(CreateCustomerOrderCommand $command) {
     $customer = $this->customerRespository->findById($command->getCustomerId());
     if (!$customer) {
-      throw new \Exception("Customer not found");
+      throw new NotFoundException("Customer not found");
     }
 
     $deposit = $this->depositRepository->findById($command->getDepositId());
     if(!$deposit) {
-      throw new \Exception('Deposit not found');
+      throw new NotFoundException('Deposit not found');
     }
 
     $deposit->allocateStockFor($command->getProductId(), $command->getQuantity());
