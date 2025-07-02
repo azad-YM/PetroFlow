@@ -8,7 +8,7 @@ use App\Application\Ports\Repositories\IOrderPaymentRepository;
 use App\Domain\Entity\CustomerOrder;
 use App\Infrastructure\ForTests\Repositories\InMemoryCustomerOrderRepository;
 use App\Infrastructure\ForTests\Repositories\InMemoryOrderPaymentRepository;
-use App\Infrastructure\ForTests\Service\FixedIdProvider;
+use App\Infrastructure\ForTests\Services\FixedIdProvider;
 use PHPUnit\Framework\TestCase;
 
 class PayCustomerOrderTest extends TestCase {

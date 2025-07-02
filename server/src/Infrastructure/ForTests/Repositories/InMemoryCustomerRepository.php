@@ -17,4 +17,8 @@ class InMemoryCustomerRepository implements ICustomerRepository {
 
     return null;
   }
+
+  public function save($customer): void {
+    array_push($this->customers, $customer);
+  }
 }

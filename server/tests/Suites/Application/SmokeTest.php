@@ -10,5 +10,9 @@ class SmokeTest extends ApplicationTestCase {
     $client->request('GET', '/');
 
     $this->assertResponseStatusCodeSame(200);
+    $response = $client->getResponse();
+    $data = json_decode($response->getContent(), true);
+
+    $this->assertEquals('Hello, World!', $data['message']);
   }
 }

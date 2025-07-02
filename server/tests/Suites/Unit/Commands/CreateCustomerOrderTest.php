@@ -11,7 +11,7 @@ use App\Domain\Entity\Customer;
 use App\Domain\Entity\Product;
 use App\Domain\Model\AuthenticatedUser;
 use App\Infrastructure\ForTests\Repositories\InMemoryCustomerOrderRepository;
-use App\Infrastructure\ForTests\Service\FixedAuthenticatedUserProvider;
+use App\Infrastructure\ForTests\Services\FixedAuthenticatedUserProvider;
 use PHPUnit\Framework\TestCase;
 use App\Application\Commands\CreateCustomerOrder\CreateCustomerOrderCommandHandler;
 use App\Application\Ports\Repositories\IDepositRepository;
@@ -19,7 +19,7 @@ use App\Domain\Entity\Deposit;
 use App\Domain\Entity\ProductStock;
 use App\Infrastructure\ForTests\Repositories\InMemoryCustomerRepository;
 use App\Infrastructure\ForTests\Repositories\InMemoryDepositRepository;
-use App\Infrastructure\ForTests\Service\FixedIdProvider;
+use App\Infrastructure\ForTests\Services\FixedIdProvider;
 
 class CreateCustomerOrderTest extends TestCase {
   private IAuthenticatedUserProvider $userProvider;

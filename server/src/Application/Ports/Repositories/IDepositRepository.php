@@ -6,4 +6,5 @@ use App\Domain\Entity\Deposit;
 
 interface IDepositRepository {
   public function findById(string $id): ?Deposit;
+  public function save(Deposit $deposit): void;
 }

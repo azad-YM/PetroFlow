@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Infrastructure\ForTests\Service;
+namespace App\Infrastructure\ForTests\Services;
 
 use App\Application\Ports\Services\IAuthenticatedUserProvider;
 use App\Domain\Model\AuthenticatedUser;
