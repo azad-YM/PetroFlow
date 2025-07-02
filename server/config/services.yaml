@@ -17,12 +17,14 @@ services:
         resource: '../src/'
         exclude: 
             - '../src/Kernel.php'
-            - '../src/Infrastructure/ForTests/Services/**/*'
+            - '../src/Infrastructure/ForTests/**/*'
 
     App\Application\Ports\Services\IAuthenticatedUserProvider: '@App\Infrastructure\ForProduction\Services\WebAuthenticatedUserProvider'
     App\Application\Ports\Services\IIdProvider: '@App\Infrastructure\ForProduction\Services\RandomIdProvider'
     App\Application\Ports\Repositories\ICustomerRepository: '@App\Infrastructure\ForProduction\Repository\SqlCustomerRepository'
     App\Application\Ports\Repositories\ICustomerOrderRepository: '@App\Infrastructure\ForProduction\Repository\SqlCustomerOrderRepository'
     App\Application\Ports\Repositories\IDepositRepository: '@App\Infrastructure\ForProduction\Repository\SqlDepositRepository'
+    App\Application\Ports\Repositories\IUserRepository: '@App\Infrastructure\ForProduction\Repository\SqlUserRepository'
+
 
 

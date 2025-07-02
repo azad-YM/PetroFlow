@@ -7,6 +7,7 @@ use App\Domain\Entity\Customer;
 use App\Domain\Entity\CustomerOrder;
 use App\Domain\Entity\Deposit;
 use App\Domain\Entity\Product;
+use App\Domain\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -24,11 +25,14 @@ class SqlCustomerOrderRepository extends ServiceEntityRepository implements ICus
     $customer = $em->getReference(Customer::class, $customerOrder->getCustomerId());
     $deposit = $em->getReference(Deposit::class, $customerOrder->getDepositId());
     $product = $em->getReference(Product::class, $customerOrder->getProductId());
-
+    $author = $em->getReference(User::class, $customerOrder->getAuthorId());
+    
     $customerOrder
       ->setCustomer($customer)
       ->setDeposit($deposit)
-      ->setProduct($product);
+      ->setProduct($product)
+      ->setAuthor($author)
+    ;
 
     $em->persist($customerOrder);
   }
@@ -42,6 +46,7 @@ class SqlCustomerOrderRepository extends ServiceEntityRepository implements ICus
       ->setCustomerId($customerOrder->getCustomer()->getId())
       ->setDepositId($customerOrder->getDeposit()->getId())
       ->setProductId($customerOrder->getProduct()->getId())
+      ->setAuthorId($customerOrder->getAuthor()->getId())
     ;
   }
 }

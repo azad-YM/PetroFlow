@@ -8,6 +8,7 @@ class CustomerOrder {
   private Customer $customer;
   private Deposit $deposit;
   private Product $product;
+  private User $author;
 
   public function __construct(
     private string $id, 
@@ -65,6 +66,11 @@ class CustomerOrder {
     return $this->authorId;
   }
 
+  public function setAuthorId(string $authorId) {
+    $this->authorId = $authorId;
+    return $this;
+  }
+
   public function getCustomer() {
     return $this->customer;
   }
@@ -89,6 +95,15 @@ class CustomerOrder {
 
   public function setProduct(Product $product) {
     $this->product = $product;
+    return $this;
+  }
+
+  public function getAuthor() {
+    return $this->author;
+  }
+
+  public function setAuthor(User $author) {
+    $this->author = $author;
     return $this;
   }
 }
