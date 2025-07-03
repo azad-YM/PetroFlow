@@ -10,7 +10,9 @@ use App\Application\Ports\Services\IAuthenticatedUserProvider;
 use App\Application\Ports\Services\IIdProvider;
 use App\Domain\Entity\CustomerOrder;
 use App\Domain\ViewModel\IdViewModel;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
+#[AsMessageHandler]
 class CreateCustomerOrderCommandHandler {
   public function __construct(
     private IIdProvider $idProvider,
@@ -25,7 +27,7 @@ class CreateCustomerOrderCommandHandler {
     if (!$customer) {
       throw new NotFoundException("Customer not found");
     }
-
+    
     $deposit = $this->depositRepository->findById($command->getDepositId());
     if(!$deposit) {
       throw new NotFoundException('Deposit not found');
@@ -44,5 +46,9 @@ class CreateCustomerOrderCommandHandler {
 
     $this->customerOrderRepository->save($customerOrder);
     return new IdViewModel($customerOrder->getId());
+  }
+
+  public function __invoke(CreateCustomerOrderCommand $command) {
+    return $this->execute($command);
   }
 }

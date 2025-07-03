@@ -3,22 +3,13 @@
 namespace App\Application\Controller;
 
 use App\Application\Commands\CreateCustomerOrder\CreateCustomerOrderCommand;
-use App\Application\Commands\CreateCustomerOrder\CreateCustomerOrderCommandHandler;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
+use App\Lib\AppController;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
-class CreationOrderController extends AbstractController {
+class CreationOrderController extends AppController {
   #[Route('/api/create-customer-order', format: "json")]
-  public function createOrder(
-    CreateCustomerOrderCommandHandler $commandHandler, 
-    EntityManagerInterface $entityManager, 
-    #[MapRequestPayload] CreateCustomerOrderCommand $command
-  ) {
-    $response = $commandHandler->execute($command);
-    $entityManager->flush();
-    return $this->json($response);
+  public function createOrder(#[MapRequestPayload] CreateCustomerOrderCommand $command) {
+    return $this->dispatch($command);
   }
 }
