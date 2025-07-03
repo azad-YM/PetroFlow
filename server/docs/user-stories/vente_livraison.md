@@ -11,7 +11,7 @@
 ```gherkin
 Feature: Création de commande client
 
-  Scenario: Un agent commercial crée une commande et réserve le stock
+  Scenario: Un agent commercial crée une commande
     Given le dépôt "deposit-id" a 10 000 litres de "product-id" en stock disponible
     And un client nommé "customer-id" existe
     When un agent commercial nommé "user-id" enregistre une commande de 2 000 litres de "product-id" pour "customer-id"
