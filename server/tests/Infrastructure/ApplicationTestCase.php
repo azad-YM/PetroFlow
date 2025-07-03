@@ -2,7 +2,6 @@
 
 namespace App\Tests\Infrastructure;
 
-use App\Tests\Fixtures\UserFixture;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\Console\Application;

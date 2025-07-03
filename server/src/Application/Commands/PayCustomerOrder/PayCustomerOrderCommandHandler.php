@@ -26,7 +26,7 @@ class PayCustomerOrderCommandHandler {
       amount: $amount
     );
 
-    $customerOrder->setStatus("PRÊTE_LIVRAISON");
+    $customerOrder->setPaymentStatus("PRÊTE_LIVRAISON");
     $this->paymentRepository->save($payment);
 
     return new IdViewModel($this->idProvider->getId());

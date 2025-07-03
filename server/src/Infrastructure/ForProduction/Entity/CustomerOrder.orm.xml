@@ -8,7 +8,8 @@
   <entity name="App\Domain\Entity\CustomerOrder" table="customer_orders">
     <id name="id" type="string" column="id" />
     <field name="quantity" type="integer" column="quantity" />
-    <field name="status" type="string" column="status" />
+    <field name="paymentStatus" type="string" column="payment_status" />
+    <field name="deliveryStatus" type="string" column="delivery_status" />
     <many-to-one field="customer" target-entity="App\Domain\Entity\Customer">
       <join-column name="customer_id" referenced-column-name="id" nullable="false" />
     </many-to-one>

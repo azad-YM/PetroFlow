@@ -3,7 +3,9 @@
 namespace App\Domain\Entity;
 
 class CustomerOrder {
-  private string $status = "EN_ATTENTE_PAIEMENT";
+  private string $paymentStatus = "NOT_PAYED";
+  private string $deliveryStatus = "NOT_DELIVERED";
+
 
   private Customer $customer;
   private Deposit $deposit;
@@ -54,12 +56,20 @@ class CustomerOrder {
     return $this->quantity;
   }
 
-  public function getStatus() {
-    return $this->status;
+  public function getPaymentStatus() {
+    return $this->paymentStatus;
   }
 
-  public function setStatus(string $status) {
-    $this->status = $status;
+  public function setPaymentStatus(string $status) {
+    $this->paymentStatus = $status;
+  }
+
+  public function getDeliveryStatus() {
+    return $this->deliveryStatus;
+  }
+
+  public function setDeliveryStatus(string $status) {
+    $this->deliveryStatus = $status;
   }
 
   public function getAuthorId() {

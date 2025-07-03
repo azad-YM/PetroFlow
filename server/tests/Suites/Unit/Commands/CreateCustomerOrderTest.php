@@ -73,7 +73,8 @@ class CreateCustomerOrderTest extends TestCase {
     $this->assertEquals(2_000, $order->getQuantity());
     $this->assertEquals(2_000, $deposit->getAllocatedStockFor("product-id"));
     $this->assertEquals(10_000 - 2_000, $deposit->getStockForProduct("product-id")->getQuantity());
-    $this->assertEquals("EN_ATTENTE_PAIEMENT", $order->getStatus());
+    $this->assertEquals("NOT_PAYED", $order->getPaymentStatus());
+    $this->assertEquals("NOT_DELIVERED", $order->getDeliveryStatus());
     $this->assertEquals("user-id", $order->getAuthorId());
   }
 

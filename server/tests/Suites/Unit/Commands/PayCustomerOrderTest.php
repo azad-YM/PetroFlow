@@ -41,7 +41,7 @@ class PayCustomerOrderTest extends TestCase {
     $this->assertEquals("payment-id", $response->getId());
     $this->assertNotNull($payment);
     $this->assertEquals(2_000_000, $payment->getAmount());
-    $this->assertEquals("PRÊTE_LIVRAISON", $customerOrder?->getStatus());
+    $this->assertEquals("PRÊTE_LIVRAISON", $customerOrder?->getPaymentStatus());
   }
 
   public function test_WhenCustomerOrderNotFound_ShouldThrow() {

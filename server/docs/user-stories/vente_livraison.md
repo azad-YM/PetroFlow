@@ -2,22 +2,22 @@
 
 ---
 
-## 🧩 US-VEN-01 – Création d’une commande client (réservation stock)
+### 🧩 US-VEN-01 – Création d’une commande client
 
-> En tant qu’**agent commercial**,
-> Je veux **enregistrer une commande de produits pétroliers pour un client**,
-> Afin de **réserver le stock nécessaire et préparer la livraison**.
+> En tant que **agent commercial**,
+> Je veux **enregistrer une commande client** dans un dépôt,
+> Afin de **lancer le processus de livraison et de paiement**.
 
 ```gherkin
 Feature: Création de commande client
 
-  Scenario: Un agent commercial crée une commande
-    Given le dépôt "deposit-id" a 10 000 litres de "product-id" en stock disponible
-    And un client nommé "customer-id" existe
-    When un agent commercial nommé "user-id" enregistre une commande de 2 000 litres de "product-id" pour "customer-id"
-    Then une commande avec un identifiant "customer-order-id" est créée pour "customer-id"
-    And elle est en état "EN_ATTENTE_PAIEMENT"
-    And 2 000 litres de "product-id" sont réservés et bloqués dans le stock
+  Scenario: Commande simple d’un produit
+    Given un client nommé "Société Azur" existe
+    And le produit "Gasoil" est disponible dans le dépôt "Fomboni"
+    When j’enregistre une commande de 2 000 litres de "Gasoil" pour "Société Azur"
+    Then une commande est créée
+    And son état de paiement est "NON_PAYÉ"
+    And son état de livraison est "NON_LIVRÉ"
 ```
 
 ---
@@ -25,46 +25,97 @@ Feature: Création de commande client
 ## 🧩 US-VEN-02 – Paiement d’une commande (optionnel pour crédit)
 
 > En tant qu’**agent comptable**,
-> Je veux **enregistrer un paiement pour une commande**,
-> Afin de **valider la transaction et débloquer la suite du processus**.
+> Je veux **enregistrer un paiement (total ou partiel) pour une commande**,
+> Afin de **mettre à jour son état financier et l’autorisation éventuelle de livraison**.
 
 ```gherkin
 Feature: Paiement d’une commande
 
   Scenario: Paiement total d’une commande
-    Given une commande de 2 000 litres de "product-id" existe pour "customer-id" en état "EN_ATTENTE_PAIEMENT"
-    When un paiement de 2 000 000 KMF est enregistré pour cette commande
-    Then la commande passe à l’état "PRÊTE_LIVRAISON"
+    Given une commande de 2 000 litres pour "Client X" en état "NON_PAYÉ"
+    When un paiement de la totalité du montant est enregistré
+    Then l’état de paiement passe à "PAYÉ"
+    And la commande est automatiquement autorisée à la livraison
 
-  Scenario: Commande en crédit sans paiement immédiat
-    Given une commande de 2 000 litres de "Gasoil" existe pour "Client Créditeur" en état "EN_ATTENTE_PAIEMENT"
-    When aucun paiement n’est encore enregistré
-    Then la commande peut rester en état "EN_ATTENTE_PAIEMENT"
-    And la livraison peut être autorisée en mode crédit
+  Scenario: Paiement partiel d’une commande
+    Given une commande de 2 000 litres pour "Client Y" en état "NON_PAYÉ"
+    When un paiement de 1 000 litres est enregistré
+    Then l’état de paiement passe à "PARTIELLEMENT_PAYÉ"
+    And la commande n’est pas autorisée à la livraison par défaut
+
+  Scenario: Commande en crédit autorisé (pas de paiement initial)
+    Given une commande pour "Client Créditeur" en état "NON_PAYÉ"
+    And le client est autorisé à faire du crédit
+    When la commande est enregistrée
+    Then l’état de paiement est "CRÉDIT_AUTORISÉ"
+    And la commande est automatiquement autorisée à la livraison
 ```
 
 ---
 
-## 🧩 US-VEN-03 – Génération du bon de livraison
+## 🧩 US-VEN-03 – Autorisation manuelle de livraison
 
-> En tant que **responsable livraison**,
-> Je veux **générer un bon de livraison en assignant chauffeur, véhicule et dépôt**,
-> Afin de **préparer la livraison physique**.
+> En tant que **manager ou responsable**,
+> Je veux **autoriser manuellement la livraison d’une commande partiellement ou non payée**,
+> Afin de **permettre la livraison malgré un paiement incomplet**.
+
+```gherkin
+Feature: Autorisation manuelle de livraison
+
+  Scenario: Autorisation manuelle après paiement partiel
+    Given une commande est en état de paiement "PARTIELLEMENT_PAYÉ"
+    And la livraison n’est pas autorisée
+    When un manager autorise la livraison
+    Then la commande est autorisée à la livraison
+
+  Scenario: Autorisation manuelle sur commande non payée
+    Given une commande est en état "NON_PAYÉ"
+    When un manager autorise la livraison
+    Then la commande est autorisée à la livraison
+```
+
+---
+
+## 🧩 US-VEN-04 – Révocation de l’autorisation de livraison
+
+> En tant que **manager ou responsable**,
+> Je veux **révoquer l’autorisation de livraison sur une commande**,
+> Afin de **bloquer la livraison en cas de problème**.
+
+```gherkin
+Feature: Révocation de l’autorisation de livraison
+
+  Scenario: Révocation d’une livraison autorisée
+    Given une commande est autorisée à la livraison
+    When un manager révoque l’autorisation
+    Then la commande n’est plus autorisée à la livraison
+```
+
+---
+
+## 🧩 US-VEN-05 – Préparation de la livraison
+
+> En tant qu’**agent logistique**,
+> Je veux **préparer la livraison uniquement pour les commandes autorisées à la livraison**,
+> Afin de **respecter les règles de paiement et autorisation**.
 
 ```gherkin
 Feature: Préparation de la livraison
 
-  Scenario: Création d’un bon de livraison
-    Given une commande "PRÊTE_LIVRAISON" ou "EN_ATTENTE_PAIEMENT" (en crédit) existe
-    And un véhicule "NGZ-1234" est disponible
-    And un chauffeur "Ali Madi" est assigné
-    When je génère un bon de livraison
-    Then la commande passe à l’état "EN_COURS_LIVRAISON"
-    And un bon de livraison est lié à cette commande
+  Scenario: Préparation autorisée
+    Given une commande est autorisée à la livraison
+    When je prépare la livraison
+    Then l’état de livraison passe à "EN_PRÉPARATION"
+
+  Scenario: Préparation bloquée sans autorisation
+    Given une commande n’est pas autorisée à la livraison
+    When je tente de préparer la livraison
+    Then une erreur est affichée "Livraison non autorisée"
 ```
+
 ---
 
-## 🧩 US-DEL-04 – Saisie du relevé compteur de livraison
+## 🧩 US-DEL-06 – Saisie du relevé compteur de livraison
 
 > En tant que **agent de livraison**,
 > Je veux **enregistrer manuellement le relevé du compteur de sortie**,
@@ -84,7 +135,7 @@ Feature: Saisie du relevé compteur
 
 ---
 
-## 🧩 US-DEL-05 – Validation manuelle de la livraison
+## 🧩 US-DEL-07 – Validation manuelle de la livraison
 
 > En tant que **agent de livraison**,
 > Je veux **valider qu’une livraison s’est bien déroulée**,
@@ -103,7 +154,7 @@ Feature: Validation de la livraison
 
 ---
 
-## 🧩 US-STOCK-06 – Déduction manuelle du stock par citerne
+## 🧩 US-STOCK-08 – Déduction manuelle du stock par citerne
 
 > En tant qu’**agent de livraison**,
 > Je veux **répartir manuellement la quantité livrée sur les citernes du dépôt**,
@@ -129,7 +180,7 @@ Feature: Déduction manuelle du stock par citerne
 
 ---
 
-## 🧩 US-DEL-07 – Correction ou annulation du relevé
+## 🧩 US-DEL-09 – Correction ou annulation du relevé
 
 > En tant qu’**agent de livraison**,
 > Je veux **pouvoir corriger un relevé compteur en cas d’erreur**,
@@ -147,7 +198,7 @@ Feature: Correction du relevé compteur
 
 ---
 
-## 🧩 US-STOCK-08 – Annulation de la livraison
+## 🧩 US-STOCK-10 – Annulation de la livraison
 
 > En tant que **agent de livraison**,
 > Je veux **annuler une livraison si elle a échoué**,
