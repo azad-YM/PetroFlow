@@ -3,54 +3,47 @@
 namespace App\Tests\Suites\Application;
 
 use App\Application\Ports\Repositories\ICustomerOrderRepository;
-use App\Application\Ports\Repositories\ICustomerRepository;
-use App\Application\Ports\Repositories\IDepositRepository;
-use App\Application\Ports\Repositories\IProductRepository;
-use App\Application\Ports\Repositories\IUserRepository;
 use App\Domain\Entity\Customer;
 use App\Domain\Entity\Deposit;
 use App\Domain\Entity\Product;
 use App\Domain\Entity\ProductStock;
 use App\Domain\Entity\User;
+use App\Tests\Fixtures\CustomerFixture;
+use App\Tests\Fixtures\DepositFixture;
+use App\Tests\Fixtures\ProductFixture;
+use App\Tests\Fixtures\UserFixture;
 use App\Tests\Infrastructure\ApplicationTestCase;
-use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasher;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class CreateCustomerOrderTest extends ApplicationTestCase {
-  public function test_happyPath() {
+  public function setUp(): void {
     $client = self::initialize();
-    $product = new Product('product-id');
 
-    /**  @var ICustomerRepository $customerRepository */
-    $customerRepository = self::getContainer()->get(ICustomerRepository::class);
-    $customerRepository->save(new Customer('customer-id'));
-
-    /**  @var IProductRepository $productRepository */
-    $productRepository = self::getContainer()->get(IProductRepository::class);
-    $productRepository->save($product);
-
-    /**  @var IDepositRepository $depositRepository */
-    $depositRepository = self::getContainer()->get(IDepositRepository::class);
-    $depositRepository->save(new Deposit(
-      'deposit-id', 
-      [new ProductStock($product, 300)]
+    $userFixture = new UserFixture( User::create(
+      id: "user-id", 
+      email: "azad@gmail.com", 
+      password: "azerty"
     ));
 
-    $user = new User("user-id");
-    $user->setEmail("azad@gmail.com");
-    $factory = new PasswordHasherFactory([
-        User::class => ['algorithm' => 'auto'],
+    $customerFixture =  new CustomerFixture(new Customer("customer-id"));
+
+    $product = new Product('product-id');
+    $productFixture = new ProductFixture($product);
+
+    $stocks = [new ProductStock($product, 300)];
+    $deposit = new Deposit('deposit-id', $stocks);
+    $depositFixture = new DepositFixture($deposit);
+
+    $this->load([
+      $userFixture,
+      $productFixture,
+      $depositFixture,
+      $customerFixture,
     ]);
-    $passwordHasher = new UserPasswordHasher($factory);
-    $user->setPassword($passwordHasher->hashPassword($user, "azerty"));
 
-    /**  @var IUserRepository $userRepository */
-    $userRepository = self::getContainer()->get(IUserRepository::class);
-    $userRepository->save($user);
+    $userFixture->authenticate($client);
+  }
 
-    $client->loginUser($user);
-
+  public function test_happyPath() {
     $this->request('POST', '/api/create-customer-order', [
       "customerId" => "customer-id",
       "productId" => "product-id",
@@ -60,56 +53,24 @@ class CreateCustomerOrderTest extends ApplicationTestCase {
 
     $this->assertResponseStatusCodeSame(200);
 
-    $response = $client->getResponse();
+    $response = self::$client->getResponse();
     $data = json_decode($response->getContent(), true);
     $id = $data["id"];
 
     /**  @var ICustomerOrderRepository $customerOrderRepository */
     $customerOrderRepository = self::getContainer()->get(ICustomerOrderRepository::class);
     $customerOrder = $customerOrderRepository->findById($id);
-    
+
     $this->assertNotNull($customerOrder);
     $this->assertEquals("customer-id", $customerOrder->getCustomerId());
     $this->assertEquals("product-id", $customerOrder->getProductId());
     $this->assertEquals("deposit-id", $customerOrder->getDepositId());
     $this->assertEquals(200, $customerOrder->getQuantity());
     $this->assertEquals("EN_ATTENTE_PAIEMENT", $customerOrder->getStatus());
-    $this->assertEquals($customerOrder->getAuthorId(), $user->getId());
+    $this->assertEquals($customerOrder->getAuthorId(), "user-id");
   }
 
   public function test_CustomerNotFound() {
-    $client = self::initialize();
-    $product = new Product('product-id');
-
-    /**  @var ICustomerRepository $customerRepository */
-    $customerRepository = self::getContainer()->get(ICustomerRepository::class);
-    $customerRepository->save(new Customer('customer-id'));
-
-    /**  @var IProductRepository $productRepository */
-    $productRepository = self::getContainer()->get(IProductRepository::class);
-    $productRepository->save($product);
-
-    /**  @var IDepositRepository $depositRepository */
-    $depositRepository = self::getContainer()->get(IDepositRepository::class);
-    $depositRepository->save(new Deposit(
-      'deposit-id', 
-      [new ProductStock($product, 300)]
-    ));
-
-    $user = new User("user-id");
-    $user->setEmail("azad@gmail.com");
-    $factory = new PasswordHasherFactory([
-        User::class => ['algorithm' => 'auto'],
-    ]);
-    $passwordHasher = new UserPasswordHasher($factory);
-    $user->setPassword($passwordHasher->hashPassword($user, "azerty"));
-
-    /**  @var IUserRepository $userRepository */
-    $userRepository = self::getContainer()->get(IUserRepository::class);
-    $userRepository->save($user);
-
-    $client->loginUser($user);
-
     $this->request('POST', '/api/create-customer-order', [
       "customerId" => "not-found-id",
       "depositId" => "deposit-id",
@@ -122,5 +83,16 @@ class CreateCustomerOrderTest extends ApplicationTestCase {
 
     $this->assertResponseStatusCodeSame(404);
     $this->assertEquals('Customer not found', $data['message']);
+  }
+
+  public function test_InvalidInput() {
+    $this->request('POST', '/api/create-customer-order', [
+      "customerId" => "",
+      "depositId" => "",
+      "productId" => "",
+      "quantity" => 200,
+    ]);
+
+    $this->assertResponseStatusCodeSame(400);
   }
 }

@@ -14,4 +14,8 @@ class SqlUserRepository extends ServiceEntityRepository implements IUserReposito
   public function save(User $user): void {
     $this->getEntityManager()->persist($user);
   }
+
+  public function findById(string $userId): ?User {
+    return $this->find($userId);
+  }
 }

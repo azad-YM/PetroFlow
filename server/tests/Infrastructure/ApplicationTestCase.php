@@ -2,6 +2,7 @@
 
 namespace App\Tests\Infrastructure;
 
+use App\Tests\Fixtures\UserFixture;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -35,15 +36,26 @@ class ApplicationTestCase extends WebTestCase {
       uri: $uri, 
       parameters: [], 
       files: [], 
-      server: [], 
+      server: [
+        'CONTENT_TYPE' => 'application/json'
+      ], 
       content: json_encode($body)
     );
-    
+
     $this->afterRequest();
   }
 
   protected function afterRequest() {
     $entityManager = self::getContainer()->get(EntityManagerInterface::class);
     $entityManager->clear();
+  }
+
+  protected function load(array $fixtures = []) {
+    foreach($fixtures as $fixture) {
+      $fixture->load(self::getContainer());
+    }
+
+    $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+    $entityManager->flush();
   }
 }

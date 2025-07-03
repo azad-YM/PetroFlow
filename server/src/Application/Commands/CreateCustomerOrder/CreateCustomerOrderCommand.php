@@ -2,11 +2,20 @@
 
 namespace App\Application\Commands\CreateCustomerOrder;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 class CreateCustomerOrderCommand {
   public function __construct(
+    #[Assert\NotBlank(message: 'Customer id is required')]
     private readonly string $customerId,
+
+    #[Assert\NotBlank(message: "Product id is required")]
     private readonly string $productId,
+
+    #[Assert\NotBlank(message: "Deposit id is required")]
     private readonly string $depositId,
+
+    #[Assert\NotBlank()]
     private readonly int $quantity = 0,
   ) {}
 
