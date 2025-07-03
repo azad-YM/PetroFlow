@@ -2,9 +2,14 @@
 
 namespace App\Domain\Entity;
 
+use App\Domain\Service\IOrderPricing;
+use App\Domain\Service\IOrderPricingProvider;
+use App\Domain\Service\IPricingProvider;
+
 class CustomerOrder {
   private string $paymentStatus = "NOT_PAYED";
   private string $deliveryStatus = "NOT_DELIVERED";
+  private bool $deliveryAuthorized = false;
 
 
   private Customer $customer;
@@ -115,5 +120,20 @@ class CustomerOrder {
   public function setAuthor(User $author) {
     $this->author = $author;
     return $this;
+  }
+
+  public function isDeliveryAuthorized(): bool {
+    return $this->deliveryAuthorized;
+  }
+
+  public function registerPayment(int $paidAmount, IPricingProvider $priceProvider) {
+    $isPaid = $priceProvider->isFullyPaid($paidAmount, $this);
+    if ($isPaid) {
+      $this->deliveryAuthorized = true;
+      $this->paymentStatus = 'PAYED';
+    } else {
+      $this->deliveryAuthorized = false;
+      $this->paymentStatus = 'PARTIALLY_PAYED';
+    }
   }
 }

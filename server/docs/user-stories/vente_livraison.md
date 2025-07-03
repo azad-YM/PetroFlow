@@ -42,13 +42,6 @@ Feature: Paiement d’une commande
     When un paiement de 1 000 litres est enregistré
     Then l’état de paiement passe à "PARTIELLEMENT_PAYÉ"
     And la commande n’est pas autorisée à la livraison par défaut
-
-  Scenario: Commande en crédit autorisé (pas de paiement initial)
-    Given une commande pour "Client Créditeur" en état "NON_PAYÉ"
-    And le client est autorisé à faire du crédit
-    When la commande est enregistrée
-    Then l’état de paiement est "CRÉDIT_AUTORISÉ"
-    And la commande est automatiquement autorisée à la livraison
 ```
 
 ---

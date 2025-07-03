@@ -2,50 +2,90 @@
 
 namespace App\Tests\Suites\Unit\Commands;
 
+use App\Application\Commands\PayCustomerOrder\PayCustomerOrderCommand;
 use App\Application\Commands\PayCustomerOrder\PayCustomerOrderCommandHandler;
 use App\Application\Ports\Repositories\ICustomerOrderRepository;
 use App\Application\Ports\Repositories\IOrderPaymentRepository;
 use App\Domain\Entity\CustomerOrder;
+use App\Domain\Model\AuthenticatedUser;
+use App\Domain\Service\IPricingProvider;
 use App\Infrastructure\ForTests\Repositories\InMemoryCustomerOrderRepository;
 use App\Infrastructure\ForTests\Repositories\InMemoryOrderPaymentRepository;
+use App\Infrastructure\ForTests\Services\FixedAuthenticatedUserProvider;
 use App\Infrastructure\ForTests\Services\FixedIdProvider;
+use App\Infrastructure\ForTests\Services\FixedPricingProvider;
 use PHPUnit\Framework\TestCase;
 
 class PayCustomerOrderTest extends TestCase {
   private PayCustomerOrderCommandHandler $commandHandler;
 
   private ICustomerOrderRepository $orderRepository;
-
   private IOrderPaymentRepository $paymentRepository;
+
+  private IPricingProvider $pricingProvider;
 
   public function setUp(): void {
     parent::setUp();
     $orders = [
-      new CustomerOrder("customer-order-id", 2_000, "customer-id", "product-id", "deposit-id", "author-id"),
+      new CustomerOrder(
+        id: "customer-order-id",
+        quantity: 2_000, 
+        customerId: "customer-id", 
+        productId: "product-id", 
+        depositId: "deposit-id", 
+        authorId: "author-id"
+      ),
     ];
 
     $this->orderRepository = new InMemoryCustomerOrderRepository($orders);
     $this->paymentRepository = new InMemoryOrderPaymentRepository();
+    $this->pricingProvider = new FixedPricingProvider();
+
     $this->commandHandler = new PayCustomerOrderCommandHandler(
       new FixedIdProvider("payment-id"),
       $this->orderRepository,
-      $this->paymentRepository
+      $this->paymentRepository,
+      $this->pricingProvider,
+      new FixedAuthenticatedUserProvider(new AuthenticatedUser('author-id'))
     );
   }
 
-  public function test_happyPath_ShouldPayCustomerOrder() {
-    $customerOrder = $this->orderRepository->findById("customer-order-id");
-    $response = $this->commandHandler->execute(orderId: "customer-order-id", amount: 2_000_000);
+  public function test_happyPath_ShouldPayTotalCustomerOrder() {
+    $command = new PayCustomerOrderCommand("customer-order-id", 2_000_000);
+    $response = $this->commandHandler->execute($command);
     $payment = $this->paymentRepository->findById($response->getId());
+
+    $customerOrder = $this->orderRepository->findById("customer-order-id");
 
     $this->assertEquals("payment-id", $response->getId());
     $this->assertNotNull($payment);
     $this->assertEquals(2_000_000, $payment->getAmount());
-    $this->assertEquals("PRÊTE_LIVRAISON", $customerOrder?->getPaymentStatus());
+    $this->assertEquals("customer-order-id", $payment->getCustomerOrderId());
+    $this->assertEquals('PAYED', $customerOrder->getPaymentStatus());
+    $this->assertTrue($customerOrder->isDeliveryAuthorized());
+    $this->assertEquals('author-id', $payment->getAuthorId());
+  }
+
+  public function test_happyPath_ShouldPayPartialCustomerOrder() {
+    $command = new PayCustomerOrderCommand("customer-order-id", 1_000_000);
+    $response = $this->commandHandler->execute($command);
+    $payment = $this->paymentRepository->findById($response->getId());
+
+    $customerOrder = $this->orderRepository->findById("customer-order-id");
+
+    $this->assertEquals("payment-id", $response->getId());
+    $this->assertNotNull($payment);
+    $this->assertEquals(1_000_000, $payment->getAmount());
+    $this->assertEquals("customer-order-id", $payment->getCustomerOrderId());
+    $this->assertEquals('PARTIALLY_PAYED', $customerOrder->getPaymentStatus());
+    $this->assertFalse($customerOrder->isDeliveryAuthorized());
+    $this->assertEquals('author-id', $payment->getAuthorId());
   }
 
   public function test_WhenCustomerOrderNotFound_ShouldThrow() {
     $this->expectExceptionMessage("Customer order not found");
-    $this->commandHandler->execute(orderId: "not-found-id", amount: 0);
+    $this->commandHandler->execute(
+      new PayCustomerOrderCommand("not-found-id", 0)
+    );
   }
 }
