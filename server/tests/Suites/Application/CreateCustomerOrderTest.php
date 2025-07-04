@@ -46,9 +46,8 @@ class CreateCustomerOrderTest extends ApplicationTestCase {
   public function test_happyPath() {
     $this->request('POST', '/api/create-customer-order', [
       "customerId" => "customer-id",
-      "productId" => "product-id",
+      "items" => [["productId" => "product-id", "quantity" => 200]],
       "depositId" => "deposit-id",
-      "quantity" => 200,
     ]);
 
     $this->assertResponseStatusCodeSame(200);
@@ -63,9 +62,9 @@ class CreateCustomerOrderTest extends ApplicationTestCase {
 
     $this->assertNotNull($customerOrder);
     $this->assertEquals("customer-id", $customerOrder->getCustomerId());
-    $this->assertEquals("product-id", $customerOrder->getProductId());
+    $this->assertEquals("product-id", $customerOrder->getItems()[0]->getProductId());
+    $this->assertEquals(200, $customerOrder->getItems()[0]->getQuantity());
     $this->assertEquals("deposit-id", $customerOrder->getDepositId());
-    $this->assertEquals(200, $customerOrder->getQuantity());
     $this->assertEquals("NOT_PAYED", $customerOrder->getPaymentStatus());
     $this->assertEquals("NOT_DELIVERED", $customerOrder->getDeliveryStatus());
     $this->assertEquals($customerOrder->getAuthorId(), "user-id");
@@ -74,9 +73,8 @@ class CreateCustomerOrderTest extends ApplicationTestCase {
   public function test_CustomerNotFound() {
     $this->request('POST', '/api/create-customer-order', [
       "customerId" => "not-found-id",
+      "items" => [["productId" => "product-id", "quantity" => 200]],
       "depositId" => "deposit-id",
-      "productId" => "product-id",
-      "quantity" => 200,
     ]);
 
     $response = self::$client->getResponse();
@@ -90,8 +88,7 @@ class CreateCustomerOrderTest extends ApplicationTestCase {
     $this->request('POST', '/api/create-customer-order', [
       "customerId" => "",
       "depositId" => "",
-      "productId" => "",
-      "quantity" => 200,
+      "items" => [["productId" => "", "quantity" => 200]],
     ]);
 
     $this->assertResponseStatusCodeSame(400);

@@ -9,6 +9,7 @@ use App\Application\Ports\Repositories\IDepositRepository;
 use App\Application\Ports\Services\IAuthenticatedUserProvider;
 use App\Application\Ports\Services\IIdProvider;
 use App\Domain\Entity\CustomerOrder;
+use App\Domain\Entity\CustomerOrderItem;
 use App\Domain\ViewModel\IdViewModel;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -32,14 +33,20 @@ class CreateCustomerOrderCommandHandler {
     if(!$deposit) {
       throw new NotFoundException('Deposit not found');
     }
-
-    $deposit->allocateStockFor($command->getProductId(), $command->getQuantity());
+    $items = [];
+    foreach($command->getItems() as $item) {
+      $deposit->allocateStockFor($item->getProductId(), $item->getQuantity());
+      $items[] = new CustomerOrderItem(
+        $this->idProvider->getId(),
+        $item->getProductId(), 
+        $item->getQuantity()
+      );
+    }
 
     $customerOrder = new CustomerOrder(
       id: $this->idProvider->getId(),
-      quantity: $command->getQuantity(),
+      items: $items,
       customerId: $customer->getId(),
-      productId: $command->getProductId(),
       depositId: $deposit->getId(),
       authorId: $this->userProvider->getUser()->getId()
     );

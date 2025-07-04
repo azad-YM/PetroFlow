@@ -7,7 +7,6 @@
 
   <entity name="App\Domain\Entity\CustomerOrder" table="customer_orders">
     <id name="id" type="string" column="id" />
-    <field name="quantity" type="integer" column="quantity" />
     <field name="paymentStatus" type="string" column="payment_status" />
     <field name="deliveryStatus" type="string" column="delivery_status" />
     <many-to-one field="customer" target-entity="App\Domain\Entity\Customer">
@@ -16,9 +15,13 @@
     <many-to-one field="deposit" target-entity="App\Domain\Entity\Deposit">
       <join-column name="deposit_id" referenced-column-name="id" nullable="false" />
     </many-to-one>
-    <many-to-one field="product" target-entity="App\Domain\Entity\Product">
-      <join-column name="product_id" referenced-column-name="id" nullable="false" />
-    </many-to-one>
+    <one-to-many field="collectionItemsForDoctrine" target-entity="App\Domain\Entity\CustomerOrderItem" mapped-by="order">
+      <cascade>
+        <cascade-persist/>
+        <cascade-remove/>
+      </cascade>
+    </one-to-many>
+
     <many-to-one field="author" target-entity="App\Domain\Entity\User">
       <join-column name="author_id" referenced-column-name="id" nullable="false" />
     </many-to-one>

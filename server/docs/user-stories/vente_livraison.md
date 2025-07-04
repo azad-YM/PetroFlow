@@ -18,6 +18,17 @@ Feature: Création de commande client
     Then une commande est créée
     And son état de paiement est "NON_PAYÉ"
     And son état de livraison est "NON_LIVRÉ"
+
+  Scenario: Commande de plusieurs produits
+    Given un client nommé "Station Moheli Nord" existe
+    And le produit "Gasoil" est disponible dans le dépôt "Fomboni"
+    And le produit "Essence SP" est aussi disponible dans le même dépôt
+    When "Station Moheli Nord" commande 1 500 litres de "Gasoil"
+    And 1 000 litres de "Essence SP"
+    Then une commande est créée contenant 2 lignes de produit
+    And son état de paiement est "NON_PAYÉ"
+    And son état de livraison est "NON_LIVRÉ"
+
 ```
 
 ---
@@ -86,29 +97,69 @@ Feature: Révocation de l’autorisation de livraison
 
 ---
 
-## 🧩 US-VEN-05 – Préparation de la livraison
+## 🧩 US-VEN-05 – Vérification de l’autorisation de livraison
 
-> En tant qu’**agent logistique**,
-> Je veux **préparer la livraison uniquement pour les commandes autorisées à la livraison**,
-> Afin de **respecter les règles de paiement et autorisation**.
+> En tant qu’**agent logistique**
+> Je veux **vérifier si une commande est autorisée à être livrée**
+> Afin de **savoir si je peux entamer la préparation de la livraison**
 
 ```gherkin
-Feature: Préparation de la livraison
+Feature: Vérification de l'autorisation de livraison
 
-  Scenario: Préparation autorisée
-    Given une commande est autorisée à la livraison
-    When je prépare la livraison
-    Then l’état de livraison passe à "EN_PRÉPARATION"
+  Scenario: Commande autorisée à être livrée
+    Given une commande est authorisée à être livrée
+    When je consulte son statut
+    Then je vois que la livraison peut être préparée
 
-  Scenario: Préparation bloquée sans autorisation
-    Given une commande n’est pas autorisée à la livraison
-    When je tente de préparer la livraison
-    Then une erreur est affichée "Livraison non autorisée"
+  Scenario: Commande non autorisée à être livrée
+    Given une commande n’est pas autorisée à être livrée
+    When je consulte son statut
+    Then je vois que la livraison ne peut pas être préparée
 ```
 
 ---
 
-## 🧩 US-DEL-06 – Saisie du relevé compteur de livraison
+## 🧩 US-VEN-06 – Préparation logistique d’une commande
+
+> En tant qu’**agent logistique**
+> Je veux **préparer la livraison d’une commande client**
+> Afin de **lui affecter les ressources nécessaires au transport**
+
+```gherkin
+Feature: Préparation logistique de la commande
+
+  Scenario: Préparation d’une commande autorisée
+    Given une commande autorisée à être livrée existe
+    And elle est en état de livraison "NOT_DELIVERED"
+    When Un agent "user-id" prépare une livraison
+    And Affecte le chauffeur "Ali" et le véhicule "Camion C17"
+    And Une date prévue de livraison au 12 juillet 2025
+    And Et saisis la note "Livraison urgente en matinée"
+    Then la commande passe à l’état de livraison "PREPARATION_EN_COURS"
+    And les informations de préparation sont enregistrées dans la livraison
+```
+
+---
+
+## 🧩 US-VEN-07 – Interdiction de préparation pour commande non autorisée
+
+> En tant qu’**agent logistique**
+> Je veux **être empêché de préparer une commande non autorisée**
+> Afin de **ne pas mobiliser de ressources pour une commande invalide**
+
+```gherkin
+Feature: Protection contre la préparation non autorisée
+
+  Scenario: Tentative de préparation sur une commande non autorisée
+    Given une commande est en état "EN_ATTENTE_PAIEMENT"
+    And elle n’est pas autorisée à être livrée
+    When j’essaie de préparer sa livraison
+    Then une erreur m’indique que la livraison n’est pas autorisée
+    And la commande reste à l’état "NOT_DELIVERED"
+```
+---
+
+## 🧩 US-DEL-08 – Saisie du relevé compteur de livraison
 
 > En tant que **agent de livraison**,
 > Je veux **enregistrer manuellement le relevé du compteur de sortie**,
@@ -119,16 +170,16 @@ Feature: Saisie du relevé compteur
 
   Scenario: Enregistrement d’un relevé simple
     Given une commande est en cours de livraison
-    And le compteur affiche 10 000 litres en début
-    When l’agent saisit une valeur de fin à 12 000 litres
-    Then le système enregistre un relevé compteur de 2 000 litres
+    And le compteur affiche "12 000 litres" en début
+    When l’agent saisit une valeur de fin à "10 000 litres"
+    Then le système enregistre un relevé compteur de "2 000 litres"
     And la quantité mesurée est liée à la commande
     And le stock n’est pas encore décrémenté
 ```
 
 ---
 
-## 🧩 US-DEL-07 – Validation manuelle de la livraison
+## 🧩 US-DEL-09 – Validation manuelle de la livraison
 
 > En tant que **agent de livraison**,
 > Je veux **valider qu’une livraison s’est bien déroulée**,
@@ -147,7 +198,7 @@ Feature: Validation de la livraison
 
 ---
 
-## 🧩 US-STOCK-08 – Déduction manuelle du stock par citerne
+## 🧩 US-STOCK-10 – Déduction manuelle du stock par citerne
 
 > En tant qu’**agent de livraison**,
 > Je veux **répartir manuellement la quantité livrée sur les citernes du dépôt**,
@@ -173,7 +224,7 @@ Feature: Déduction manuelle du stock par citerne
 
 ---
 
-## 🧩 US-DEL-09 – Correction ou annulation du relevé
+## 🧩 US-DEL-11 – Correction ou annulation du relevé
 
 > En tant qu’**agent de livraison**,
 > Je veux **pouvoir corriger un relevé compteur en cas d’erreur**,
@@ -191,7 +242,7 @@ Feature: Correction du relevé compteur
 
 ---
 
-## 🧩 US-STOCK-10 – Annulation de la livraison
+## 🧩 US-STOCK-12 – Annulation de la livraison
 
 > En tant que **agent de livraison**,
 > Je veux **annuler une livraison si elle a échoué**,

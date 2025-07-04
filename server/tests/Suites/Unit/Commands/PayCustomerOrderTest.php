@@ -2,11 +2,13 @@
 
 namespace App\Tests\Suites\Unit\Commands;
 
+use App\Application\Commands\CreateCustomerOrder\OrderItem;
 use App\Application\Commands\PayCustomerOrder\PayCustomerOrderCommand;
 use App\Application\Commands\PayCustomerOrder\PayCustomerOrderCommandHandler;
 use App\Application\Ports\Repositories\ICustomerOrderRepository;
 use App\Application\Ports\Repositories\IOrderPaymentRepository;
 use App\Domain\Entity\CustomerOrder;
+use App\Domain\Entity\CustomerOrderItem;
 use App\Domain\Model\AuthenticatedUser;
 use App\Domain\Service\IPricingProvider;
 use App\Infrastructure\ForTests\Repositories\InMemoryCustomerOrderRepository;
@@ -29,9 +31,8 @@ class PayCustomerOrderTest extends TestCase {
     $orders = [
       new CustomerOrder(
         id: "customer-order-id",
-        quantity: 2_000, 
+        items: [new CustomerOrderItem("customer-order-item-id", "product-id", 2_000)],
         customerId: "customer-id", 
-        productId: "product-id", 
         depositId: "deposit-id", 
         authorId: "author-id"
       ),

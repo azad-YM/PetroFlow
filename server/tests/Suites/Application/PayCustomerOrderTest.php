@@ -6,6 +6,7 @@ use App\Application\Ports\Repositories\ICustomerOrderRepository;
 use App\Application\Ports\Repositories\IOrderPaymentRepository;
 use App\Domain\Entity\Customer;
 use App\Domain\Entity\CustomerOrder;
+use App\Domain\Entity\CustomerOrderItem;
 use App\Domain\Entity\Deposit;
 use App\Domain\Entity\Product;
 use App\Domain\Entity\ProductStock;
@@ -36,12 +37,11 @@ class PayCustomerOrderTest extends ApplicationTestCase {
     $depositFixture = new DepositFixture($deposit);
 
     $order = new CustomerOrder(
-      "customer-order-id", 
-      2_000, 
-      "customer-id", 
-      "product-id", 
-      "deposit-id",
-      "user-id"
+      id: "customer-order-id", 
+      items: [new CustomerOrderItem("costomer-order-item-id", "product-id", 2_000)], 
+      customerId: "customer-id", 
+      depositId: "deposit-id",
+      authorId: "user-id"
     );
     $orderFixture = new CustomerOrderFixture($order);
 

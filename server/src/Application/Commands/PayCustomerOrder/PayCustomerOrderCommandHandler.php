@@ -36,9 +36,11 @@ class PayCustomerOrderCommandHandler {
     );
 
     $this->paymentRepository->save($payment);
+    $paymentPlan = $this->pricingProvider->buildPaymentPlanFor($customerOrder);
+
     $customerOrder->registerPayment(
       paidAmount: $command->getAmount(), 
-      priceProvider: $this->pricingProvider
+      plan: $paymentPlan
     );
 
     return new IdViewModel($payment->getId());

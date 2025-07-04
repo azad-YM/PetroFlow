@@ -2,9 +2,7 @@
 
 namespace App\Domain\Entity;
 
-use App\Domain\Service\IOrderPricing;
-use App\Domain\Service\IOrderPricingProvider;
-use App\Domain\Service\IPricingProvider;
+use App\Domain\Model\PaymentPlan;
 
 class CustomerOrder {
   private string $paymentStatus = "NOT_PAYED";
@@ -14,14 +12,14 @@ class CustomerOrder {
 
   private Customer $customer;
   private Deposit $deposit;
-  private Product $product;
   private User $author;
+  private $collectionItemsForDoctrine;
 
   public function __construct(
     private string $id, 
-    private int $quantity,
+    /** @var CustomerOrderItem[] */
+    private array $items,
     private string $customerId,
-    private string $productId,
     private string $depositId,
     private string $authorId,
   ) {}
@@ -39,13 +37,23 @@ class CustomerOrder {
     return $this;
   }
 
-  public function getProductId(): string {
-    return $this->productId;
+    /** @var CustomerOrderItem[] */
+  public function getItems() {
+    return $this->items;
   }
 
-  public function setProductId(string $productId) {
-    $this->productId = $productId;
+  public function setItems(array $items) {
+    $this->items = $items;
     return $this;
+  }
+
+  public function setCollectionItemsForDoctrine($items) {
+    $this->collectionItemsForDoctrine = $items;
+    return $this;
+  }
+
+  public function getCollectionItemsForDoctrine() {
+    return $this->collectionItemsForDoctrine;
   }
 
   public function getDepositId(): string {
@@ -55,10 +63,6 @@ class CustomerOrder {
   public function setDepositId(string $depositId) {
     $this->depositId = $depositId;
     return $this;
-  }
-
-  public function getQuantity(): int {
-    return $this->quantity;
   }
 
   public function getPaymentStatus() {
@@ -104,15 +108,6 @@ class CustomerOrder {
     return $this;
   }
 
-  public function getProduct() {
-    return $this->product;
-  }
-
-  public function setProduct(Product $product) {
-    $this->product = $product;
-    return $this;
-  }
-
   public function getAuthor() {
     return $this->author;
   }
@@ -126,12 +121,14 @@ class CustomerOrder {
     return $this->deliveryAuthorized;
   }
 
-  public function registerPayment(int $paidAmount, IPricingProvider $priceProvider) {
-    $isPaid = $priceProvider->isFullyPaid($paidAmount, $this);
-    if ($isPaid) {
+  public function registerPayment(int $paidAmount, PaymentPlan $plan) {
+    if ($paidAmount >= $plan->getTotalAmount()) {
       $this->deliveryAuthorized = true;
       $this->paymentStatus = 'PAYED';
-    } else {
+      return;
+    } 
+  
+    if ($plan->getTotalAmount() > $paidAmount) {
       $this->deliveryAuthorized = false;
       $this->paymentStatus = 'PARTIALLY_PAYED';
     }
