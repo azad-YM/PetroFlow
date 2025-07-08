@@ -2,10 +2,16 @@
 
 namespace App\Domain\Entity;
 
+use App\Domain\Model\IDeliveryMeasurement;
+
 class CustomerDelivery {
   private Driver $driver;
   private Vehicle $vehicle;
   private User $author;
+
+  private int $quantity;
+  /** @var IDeliveryMeasurement[] */
+  private array $measurements = [];
 
   public function __construct(
     private string $id, 
@@ -33,14 +39,6 @@ class CustomerDelivery {
     return $this;
   }
 
-  public function getDriver() {
-    return $this->driver;
-  }
-
-  public function setDriver(Driver $driver) {
-    $this->driver = $driver;
-  }
-
   public function getVehicleId() {
     return $this->vehicleId;
   }
@@ -48,14 +46,6 @@ class CustomerDelivery {
   public function setVehicleId(string $vehicleId) {
     $this->vehicleId = $vehicleId;
     return $this;
-  }
-
-  public function getVehicle() {
-    return $this->vehicle;
-  }
-
-  public function setVehicle(Vehicle $vehicle) {
-    $this->vehicle = $vehicle;
   }
 
   public function getDeliveryAt() {
@@ -69,6 +59,41 @@ class CustomerDelivery {
   public function setAuthorId(string $authorId) {
     $this->authorId = $authorId;
     return $this;
+  }
+
+  public function getDelivredQuantity() {
+    return array_sum(array_map(
+      fn(IDeliveryMeasurement $m) => $m->getQuantity(),
+      $this->measurements
+    ));
+  }
+
+  public function setQuantity(int $quantity) {
+    $this->quantity = $quantity;
+  }
+
+  public function addMeasurement(IDeliveryMeasurement $measurement) {
+    array_push($this->measurements, $measurement);
+  }
+
+
+
+
+
+  public function getDriver() {
+    return $this->driver;
+  }
+
+  public function setDriver(Driver $driver) {
+    $this->driver = $driver;
+  }
+
+  public function getVehicle() {
+    return $this->vehicle;
+  }
+
+  public function setVehicle(Vehicle $vehicle) {
+    $this->vehicle = $vehicle;
   }
 
   public function getAuthor() {

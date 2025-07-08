@@ -133,9 +133,19 @@ Feature: Préparation logistique de la commande
     And elle est en état de livraison "NOT_DELIVERED"
     When Un agent "user-id" prépare une livraison
     And Affecte le chauffeur "Ali" et le véhicule "Camion C17"
-    And Une date prévue de livraison au 12 juillet 2025
+    And Une date prévue de livraison au "12 juillet 2025"
     Then la commande passe à l’état de livraison "PREPARATION_EN_COURS"
     And les informations de préparation sont enregistrées dans la livraison
+
+  Scenario: Préparation d’une nouvelle livraison pour une commande partiellement livrée
+    Given une commande a déjà une livraison effectuée partiellement
+    And une quantité restante est encore à livrer
+    And la commande est toujours autorisée à être livrée
+    When un agent "user-id" prépare une **deuxième livraison**
+    And affecte le chauffeur "Bakari" et le véhicule "Camion C24"
+    And une date prévue de livraison au "15 juillet 2025"
+    Then une **nouvelle livraison** est ajoutée à la commande
+    And la commande reste en état "PARTIALLY_DELIVERED"
 
   Scenario: Tentative de préparation sur une commande non autorisée
     Given une commande est en état "PARTIALLY_PAYED"
@@ -156,13 +166,31 @@ Feature: Préparation logistique de la commande
 ```gherkin
 Feature: Saisie du relevé compteur
 
-  Scenario: Enregistrement d’un relevé simple
+  Scenario: Enregistrement d’un relevé via compteur
     Given une commande est en cours de livraison
     And le compteur affiche "12 000 litres" en début
     When l’agent saisit une valeur de fin à "10 000 litres"
     Then le système enregistre un relevé compteur de "2 000 litres"
-    And la quantité mesurée est liée à la commande
+    And la quantité mesurée est liée à la livraison
     And le stock n’est pas encore décrémenté
+
+  Scenario: Saisie manuelle du volume livré
+    Given une commande est en cours de livraison
+    And la citerne utilisée n’est pas reliée au compteur général
+    When l’agent saisit manuellement une quantité de "1 500 litres"
+    Then le système enregistre un relevé manuel de "1 500 litres"
+    And la quantité est liée à la livraison
+    And le stock n’est pas encore décrémenté
+
+  Scenario: Plusieurs relevés pour une seule livraison
+    Given une commande est en cours de livraison
+    And le premier relevé par compteur indique un début à "12 000 litres" et une fin à "10 000 litres"
+    And le second relevé manuel indique une saisie de "1 000 litres"
+    When les deux relevés sont enregistrés
+    Then le système calcule un volume total livré de "3 000 litres"
+    And chaque relevé est associé à une citerne distincte
+    And le stock n’est pas encore décrémenté
+
 ```
 
 ---
