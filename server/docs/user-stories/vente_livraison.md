@@ -134,29 +134,17 @@ Feature: Préparation logistique de la commande
     When Un agent "user-id" prépare une livraison
     And Affecte le chauffeur "Ali" et le véhicule "Camion C17"
     And Une date prévue de livraison au 12 juillet 2025
-    And Et saisis la note "Livraison urgente en matinée"
     Then la commande passe à l’état de livraison "PREPARATION_EN_COURS"
     And les informations de préparation sont enregistrées dans la livraison
-```
-
----
-
-## 🧩 US-VEN-07 – Interdiction de préparation pour commande non autorisée
-
-> En tant qu’**agent logistique**
-> Je veux **être empêché de préparer une commande non autorisée**
-> Afin de **ne pas mobiliser de ressources pour une commande invalide**
-
-```gherkin
-Feature: Protection contre la préparation non autorisée
 
   Scenario: Tentative de préparation sur une commande non autorisée
-    Given une commande est en état "EN_ATTENTE_PAIEMENT"
+    Given une commande est en état "PARTIALLY_PAYED"
     And elle n’est pas autorisée à être livrée
     When j’essaie de préparer sa livraison
     Then une erreur m’indique que la livraison n’est pas autorisée
     And la commande reste à l’état "NOT_DELIVERED"
 ```
+
 ---
 
 ## 🧩 US-DEL-08 – Saisie du relevé compteur de livraison

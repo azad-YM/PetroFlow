@@ -121,6 +121,10 @@ class CustomerOrder {
     return $this->deliveryAuthorized;
   }
 
+  public function authorizeDelivery() {
+    $this->deliveryAuthorized = true;
+  }
+
   public function registerPayment(int $paidAmount, PaymentPlan $plan) {
     if ($paidAmount >= $plan->getTotalAmount()) {
       $this->deliveryAuthorized = true;

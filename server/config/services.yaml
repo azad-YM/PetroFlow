@@ -1,18 +1,10 @@
-# This file is the entry point to configure your own services.
-# Files in the packages/ subdirectory configure your dependencies.
-
-# Put parameters here that don't need to change on each machine where the app is deployed
-# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
 
 services:
-    # default configuration for services in *this* file
     _defaults:
-        autowire: true      # Automatically injects dependencies in your services.
-        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        autowire: true
+        autoconfigure: true 
 
-    # makes classes in src/ available to be used as services
-    # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
         exclude: 
@@ -27,6 +19,9 @@ services:
     App\Application\Ports\Repositories\IDepositRepository: '@App\Infrastructure\ForProduction\Repository\SqlDepositRepository'
     App\Application\Ports\Repositories\IUserRepository: '@App\Infrastructure\ForProduction\Repository\SqlUserRepository'
     App\Application\Ports\Repositories\IOrderPaymentRepository: '@App\Infrastructure\ForProduction\Repository\SqlOrderPaymentRepository'
+    App\Application\Ports\Repositories\IDriverRepository: '@App\Infrastructure\ForProduction\Repository\SqlDriverRepository'
+    App\Application\Ports\Repositories\IVehicleRepository: '@App\Infrastructure\ForProduction\Repository\SqlVehicleRepository'
+    App\Application\Ports\Repositories\ICustomerDeliveryRepository: '@App\Infrastructure\ForProduction\Repository\SqlCustomerDeliveryRepository'
 
     App\Application\Listeners\ExceptionListener:
         tags: [ kernel.event_listener ]

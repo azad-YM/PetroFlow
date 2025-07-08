@@ -100,7 +100,6 @@ class CreateCustomerOrderTest extends TestCase {
     ));
 
     $order = $this->customerOrderRepository->findById($response->getId());
-    $deposit = $this->depositRepository->findById("deposit-id");
 
     $this->assertEquals($response->getId(), $order->getId());
     $this->assertNotNull($order);
