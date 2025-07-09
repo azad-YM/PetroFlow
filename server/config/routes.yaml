@@ -1,5 +1,19 @@
-controllers:
-    resource:
-        path: ../src/Application/Controller/
-        namespace: App\Application\Controller
+# Vente & Livraison
+sales_delivery:
+    resource: 
+        path: ../src/SalesDelivery/Application/Controller/
+        namespace: App\SalesDelivery\Application\Controller
     type: attribute
+
+# Stock Management
+# stock_management_controllers:
+#     resource: ../src/StockManagement/Application/Controller/
+#     namespace: StockManagement\Application\Controller
+#     type: attribute
+
+
+# controllers:
+#     resource:
+#         path: ../src/Application/Controller/
+#         namespace: App\Application\Controller
+#     type: attribute

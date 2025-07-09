@@ -9,20 +9,20 @@ services:
         resource: '../src/'
         exclude: 
             - '../src/Kernel.php'
-            - '../src/Infrastructure/ForTests/**/*'
+            - '../src/SalesDelivery/Infrastructure/ForTests/**/*'
 
-    App\Application\Ports\Services\IAuthenticatedUserProvider: '@App\Infrastructure\ForProduction\Services\WebAuthenticatedUserProvider'
-    App\Application\Ports\Services\IIdProvider: '@App\Infrastructure\ForProduction\Services\RandomIdProvider'
-    App\Domain\Service\IPricingProvider: '@App\Infrastructure\ForProduction\Services\FixedPricingProvider'
-    App\Application\Ports\Repositories\ICustomerRepository: '@App\Infrastructure\ForProduction\Repository\SqlCustomerRepository'
-    App\Application\Ports\Repositories\ICustomerOrderRepository: '@App\Infrastructure\ForProduction\Repository\SqlCustomerOrderRepository'
-    App\Application\Ports\Repositories\IDepositRepository: '@App\Infrastructure\ForProduction\Repository\SqlDepositRepository'
-    App\Application\Ports\Repositories\IUserRepository: '@App\Infrastructure\ForProduction\Repository\SqlUserRepository'
-    App\Application\Ports\Repositories\IOrderPaymentRepository: '@App\Infrastructure\ForProduction\Repository\SqlOrderPaymentRepository'
-    App\Application\Ports\Repositories\IDriverRepository: '@App\Infrastructure\ForProduction\Repository\SqlDriverRepository'
-    App\Application\Ports\Repositories\IVehicleRepository: '@App\Infrastructure\ForProduction\Repository\SqlVehicleRepository'
-    App\Application\Ports\Repositories\ICustomerDeliveryRepository: '@App\Infrastructure\ForProduction\Repository\SqlCustomerDeliveryRepository'
+    App\SalesDelivery\Application\Ports\Services\IAuthenticatedUserProvider: '@App\SalesDelivery\Infrastructure\ForProduction\Services\WebAuthenticatedUserProvider'
+    App\SalesDelivery\Application\Ports\Services\IIdProvider: '@App\SalesDelivery\Infrastructure\ForProduction\Services\RandomIdProvider'
+    App\SalesDelivery\Domain\Service\IPricingProvider: '@App\SalesDelivery\Infrastructure\ForProduction\Services\FixedPricingProvider'
+    App\SalesDelivery\Application\Ports\Repositories\ICustomerRepository: '@App\SalesDelivery\Infrastructure\ForProduction\Repository\SqlCustomerRepository'
+    App\SalesDelivery\Application\Ports\Repositories\ICustomerOrderRepository: '@App\SalesDelivery\Infrastructure\ForProduction\Repository\SqlCustomerOrderRepository'
+    App\SalesDelivery\Application\Ports\Repositories\IDepositRepository: '@App\SalesDelivery\Infrastructure\ForProduction\Repository\SqlDepositRepository'
+    App\SalesDelivery\Application\Ports\Repositories\IUserRepository: '@App\SalesDelivery\Infrastructure\ForProduction\Repository\SqlUserRepository'
+    App\SalesDelivery\Application\Ports\Repositories\IOrderPaymentRepository: '@App\SalesDelivery\Infrastructure\ForProduction\Repository\SqlOrderPaymentRepository'
+    App\SalesDelivery\Application\Ports\Repositories\IDriverRepository: '@App\SalesDelivery\Infrastructure\ForProduction\Repository\SqlDriverRepository'
+    App\SalesDelivery\Application\Ports\Repositories\IVehicleRepository: '@App\SalesDelivery\Infrastructure\ForProduction\Repository\SqlVehicleRepository'
+    App\SalesDelivery\Application\Ports\Repositories\ICustomerDeliveryRepository: '@App\SalesDelivery\Infrastructure\ForProduction\Repository\SqlCustomerDeliveryRepository'
 
-    App\Application\Listeners\ExceptionListener:
+    App\SalesDelivery\Application\Listeners\ExceptionListener:
         tags: [ kernel.event_listener ]
 

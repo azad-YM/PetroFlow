@@ -46,12 +46,14 @@
     },
     "autoload": {
         "psr-4": {
-            "App\\": "src/"
+            "App\\": "src/",
+            "App\\SalesDelivery\\": "src/SalesDelivery/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "App\\Tests\\": "tests/"
+            "App\\Tests\\SalesDelivery\\": "tests/SalesDelivery",
+            "App\\Tests\\Shared\\": "tests/Shared"
         }
     },
     "replace": {

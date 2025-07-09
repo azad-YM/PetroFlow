@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+  <entity name="App\SalesDelivery\Domain\Entity\CustomerOrder" table="customer_orders">
+    <id name="id" type="string" column="id" />
+    <field name="paymentStatus" type="string" column="payment_status" />
+    <field name="deliveryStatus" type="string" column="delivery_status" />
+    <many-to-one field="customer" target-entity="App\SalesDelivery\Domain\Entity\Customer">
+      <join-column name="customer_id" referenced-column-name="id" nullable="false" />
+    </many-to-one>
+    <many-to-one field="deposit" target-entity="App\SalesDelivery\Domain\Entity\Deposit">
+      <join-column name="deposit_id" referenced-column-name="id" nullable="false" />
+    </many-to-one>
+    <one-to-many field="collectionItemsForDoctrine" target-entity="App\SalesDelivery\Domain\Entity\CustomerOrderItem" mapped-by="order">
+      <cascade>
+        <cascade-persist/>
+        <cascade-remove/>
+      </cascade>
+    </one-to-many>
+
+    <many-to-one field="author" target-entity="App\SalesDelivery\Domain\Entity\User">
+      <join-column name="author_id" referenced-column-name="id" nullable="false" />
+    </many-to-one>
+  </entity>
+</doctrine-mapping>

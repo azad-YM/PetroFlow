@@ -18,12 +18,12 @@ doctrine:
             Doctrine\DBAL\Platforms\PostgreSQLPlatform: identity
         auto_mapping: true
         mappings:
-            App:
+            App\SalesDelivery:
                 type: xml
                 is_bundle: false
-                dir: '%kernel.project_dir%/src/Infrastructure/ForProduction/Entity'
-                prefix: 'App\Domain\Entity'
-                alias: App
+                dir: '%kernel.project_dir%/src/SalesDelivery/Infrastructure/ForProduction/Entity'
+                prefix: 'App\SalesDelivery\Domain\Entity'
+                alias: App\SalesDelivery
         controller_resolver:
             auto_mapping: false
 

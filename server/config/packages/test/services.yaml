@@ -1,2 +1,2 @@
 parameters:
-  'doctrine.dbal.connection_factory.class': App\Infrastructure\ForTests\TestConnectionFactory
+  'doctrine.dbal.connection_factory.class': App\SalesDelivery\Infrastructure\ForTests\TestConnectionFactory
