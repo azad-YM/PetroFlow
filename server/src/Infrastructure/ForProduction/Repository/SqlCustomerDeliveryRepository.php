@@ -7,7 +7,13 @@ use App\Domain\Entity\CustomerDelivery;
 use App\Domain\Entity\Driver;
 use App\Domain\Entity\User;
 use App\Domain\Entity\Vehicle;
+use App\Domain\Model\IDeliveryMeasurement;
+use App\Domain\Model\ManuallyEnteredMeasurement;
+use App\Domain\Entity\Measurement;
+use App\Domain\Factory\DeliveryMeasurementFactory;
+use App\Domain\Model\MeasuredByCounter;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Persistence\ManagerRegistry;
 
 class SqlCustomerDeliveryRepository extends ServiceEntityRepository implements ICustomerDeliveryRepository {
@@ -29,12 +35,44 @@ class SqlCustomerDeliveryRepository extends ServiceEntityRepository implements I
     $customerDelivery->setVehicle($vehicle);
     $customerDelivery->setAuthor($author);
 
+    $items = new ArrayCollection();
+    foreach($customerDelivery->getMeasurements() as $item) {
+      if ($item instanceof ManuallyEnteredMeasurement) {
+        $measurement = new Measurement(
+          deliveryId: $customerDelivery->getId(),
+          tankId: $item->getTankId(),
+          authorId: $item->getAuthorId(),
+          quantity: $item->getQuantity()
+        );
+
+        $measurement->setDelivery($customerDelivery);
+        $items->add($measurement);
+      }
+
+      if ($item instanceof MeasuredByCounter) {
+        $measurement = new Measurement(
+          deliveryId: $customerDelivery->getId(),
+          tankId: $item->getTankId(),
+          authorId: $item->getAuthorId(),
+          start: $item->getStart(),
+          end: $item->getEnd()
+        );
+        $measurement->setDelivery($customerDelivery);
+        $items->add($measurement);
+      }
+    }
+    
+    $customerDelivery->setCollectionMeasurementsForDoctrine($items);
     $em->persist($customerDelivery);
   }
 
   public function hydrate(?CustomerDelivery $customerDelivery) {
     if (!$customerDelivery) {
       return null;
+    }
+
+    foreach($customerDelivery->getCollectionMeasurementsForDoctrine() as $measurement) {
+      $customerDelivery->addMeasurement(DeliveryMeasurementFactory::createFromEntity($measurement));
     }
 
     return $customerDelivery

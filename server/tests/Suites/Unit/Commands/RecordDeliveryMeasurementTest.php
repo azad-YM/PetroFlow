@@ -7,7 +7,9 @@ use App\Application\Commands\RecordDeliveryMeasurement\RecordDeliveryMeasurement
 use App\Application\Commands\RecordDeliveryMeasurement\RecordDeliveryMeasurementCommandHandler;
 use App\Application\Ports\Repositories\ICustomerDeliveryRepository;
 use App\Domain\Entity\CustomerDelivery;
+use App\Domain\Model\AuthenticatedUser;
 use App\Infrastructure\ForTests\Repositories\InMemoryCustomerDeliveryRepository;
+use App\Infrastructure\ForTests\Services\FixedAuthenticatedUserProvider;
 use PHPUnit\Framework\TestCase;
 
 class RecordDeliveryMeasurementTest extends TestCase {
@@ -17,37 +19,41 @@ class RecordDeliveryMeasurementTest extends TestCase {
   public function setUp(): void {
     $delivery = new CustomerDelivery(
       "delivery-id", 
-      "order-id", 
+      "customer-order-id", 
       "driver-id", 
       "vehicle-id",
       "12/07/2025",
-      "author-id"
+      "user-id"
     );
 
     $this->deliveryRepository = new InMemoryCustomerDeliveryRepository([$delivery]);
     $this->commandHandler = new RecordDeliveryMeasurementCommandHandler(
-      $this->deliveryRepository
+      $this->deliveryRepository,
+      new FixedAuthenticatedUserProvider(new AuthenticatedUser('author-id'))
     );
   }
 
   public function test_happyPath_ShouldRecordDeliveryMesuredByCounter() {
     $command = new RecordDeliveryMeasurementCommand(
       "delivery-id",
-      [new MeasurementDTO(12_000, 10_000)]
+      [new MeasurementDTO('tank-id', 12_000, 10_000)]
     );
 
     $response = $this->commandHandler->execute($command);
     $delivery = $this->deliveryRepository->findById("delivery-id");
+    $measurement = $delivery->getMeasurements()[0];
 
     $this->assertNotNull($response);
     $this->assertEquals("delivery-id", $delivery->getId());
     $this->assertEquals(2_000, $delivery->getDelivredQuantity());
+    $this->assertEquals("tank-id", $measurement->getTankId());
+    $this->assertEquals("author-id", $measurement->getAuthorId());
   }
 
   public function test_happyPath_ShouldRecordDeliveryMesuredManually() {
     $command = new RecordDeliveryMeasurementCommand(
       "delivery-id",
-      [new MeasurementDTO(quantity: 1_500)]
+      [new MeasurementDTO(quantity: 1_500, tankId: 'tank-id')]
     );
 
     $response = $this->commandHandler->execute($command);
@@ -61,7 +67,10 @@ class RecordDeliveryMeasurementTest extends TestCase {
   public function test_happyPath_ShouldRecordDeliveryWithTwoMeasurements() {
     $command = new RecordDeliveryMeasurementCommand(
       "delivery-id",
-      [new MeasurementDTO(12_000, 10_000), new MeasurementDTO(quantity: 1_000)]
+      [
+        new MeasurementDTO(start: 12_000, end: 10_000, tankId: 'tank-id'), 
+        new MeasurementDTO(tankId: 'tank-2', quantity: 1_000)
+      ]
     );
 
     $response = $this->commandHandler->execute($command);

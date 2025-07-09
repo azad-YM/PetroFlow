@@ -5,13 +5,13 @@ namespace App\Domain\Entity;
 use App\Domain\Model\IDeliveryMeasurement;
 
 class CustomerDelivery {
+  /** @var IDeliveryMeasurement[] */
+  private array $measurements = [];
+
+  private $collectionMeasurementsForDoctrine;
   private Driver $driver;
   private Vehicle $vehicle;
   private User $author;
-
-  private int $quantity;
-  /** @var IDeliveryMeasurement[] */
-  private array $measurements = [];
 
   public function __construct(
     private string $id, 
@@ -68,8 +68,8 @@ class CustomerDelivery {
     ));
   }
 
-  public function setQuantity(int $quantity) {
-    $this->quantity = $quantity;
+  public function getMeasurements() {
+    return $this->measurements;
   }
 
   public function addMeasurement(IDeliveryMeasurement $measurement) {
@@ -79,6 +79,14 @@ class CustomerDelivery {
 
 
 
+   public function setCollectionMeasurementsForDoctrine($items) {
+    $this->collectionMeasurementsForDoctrine = $items;
+    return $this;
+  }
+
+  public function getCollectionMeasurementsForDoctrine() {
+    return $this->collectionMeasurementsForDoctrine;
+  }
 
   public function getDriver() {
     return $this->driver;

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+  <entity name="App\Domain\Entity\Measurement" table="measurements">
+    <id name="id" type="integer" column="id">
+      <generator strategy="AUTO"/>
+    </id>
+    <field name="tankId" type="string" />
+    <field name="authorId" type="string" />
+    <field name="quantity" type="integer" nullable="true" />
+    <field name="start" type="integer" nullable="true" />
+    <field name="end" column="end_counter" type="integer" nullable="true" />
+
+    <many-to-one field="delivery" target-entity="App\Domain\Entity\CustomerDelivery" inversed-by="measurements">
+      <join-column name="delivery_id" referenced-column-name="id" nullable="false" />
+    </many-to-one>
+  </entity>
+</doctrine-mapping>

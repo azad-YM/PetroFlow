@@ -17,5 +17,12 @@
       <many-to-one field="author" target-entity="App\Domain\Entity\User">
         <join-column name="author_id" referenced-column-name="id" nullable="false" />
       </many-to-one>
+
+      <one-to-many field="collectionMeasurementsForDoctrine" target-entity="App\Domain\Entity\Measurement" mapped-by="delivery">
+        <cascade>
+          <cascade-persist/>
+          <cascade-remove/>
+        </cascade>
+      </one-to-many>
     </entity>
 </doctrine-mapping>
